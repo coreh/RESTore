@@ -1,0 +1,9 @@
+{
+    "name": "restore",
+    "version": "0.0.1",
+    "license": "MIT",
+    "dependencies": {
+        "isomorphic-fetch": "^2.2.1",
+        "url-pattern": "^1.0.3"
+    }
+}
