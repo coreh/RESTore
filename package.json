@@ -1,9 +1,20 @@
 {
-    "name": "restore",
+    "name": "rest-ore",
     "version": "0.0.1",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/coreh/RESTore.git"
+    },
     "dependencies": {
         "isomorphic-fetch": "^2.2.1",
         "url-pattern": "^1.0.3"
+    },
+    "devDependencies": {
+        "@types/isomorphic-fetch": "0.0.34"
+    },
+    "scripts": {
+        "prepare": "tsc --project . --declaration",
+        "clean": "rm -f *.js *.d.ts"
     }
 }
