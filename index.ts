@@ -134,12 +134,15 @@ export function endpoint(baseURL: string) {
 
 export class RESTore {
     static Path = Path;
+    static endpoint = endpoint;
 
     private rules: Rule[] = [];
     private store: Map<string, StoreEntry> = new Map();
 
-    constructor(baseURL: string = '') {
-        this.use(endpoint(baseURL));
+    constructor() {
+        this.use(async function(params, options, path, next) {
+            throw new Error(`Not supported: ${options.method} ${path}`);
+        });
     }
 
     stored<T = any>(path: string): T | undefined {
