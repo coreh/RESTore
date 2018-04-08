@@ -90,6 +90,28 @@ const user = await store.get('/users/coreh');
 console.log(user); // { username: 'coreh', likes: ['Chocolate', 'Coffee'] }
 ```
 
+### Mounting existing REST API endpoints
+
+```js
+// Declaration
+store.use(RESTore.endpoint('https://api.example.com/'));
+
+// Usage
+store.get(`/flights/${airport}`)
+```
+
+### Yield multiple resources (Async Generators)
+
+TODO
+
+### Caching
+
+TODO
+
+### Optimistic Loading / Progress Reporting
+
+TODO
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
