@@ -2,7 +2,7 @@
 
 
 <p align="center">
-<img src="logo.png" width="256" height="256"><br>
+<img src="https://github.com/coreh/RESTore/raw/master/logo.png" width="256" height="256"><br>
 <strong>RESTful Data Store</strong>
 </p>
 
