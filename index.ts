@@ -27,7 +27,7 @@ interface StoreEntry {
 }
 
 export interface HandlerFunction {
-    (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void> ): AsyncIterator<Resource> | Promise<Resource>
+    (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>): AsyncIterator<Resource> | Promise<Resource>
 }
 
 interface Rule {
@@ -179,11 +179,28 @@ export class RESTore {
         return next();
     }
 
-    use(route: string, handler: HandlerFunction) {
-        this.rules.splice(this.rules.length - 1, 0, {
-            pattern: new UrlPattern(route),
-            handler,
-        });
+    use(handler: HandlerFunction);
+    use(route: string, handler: HandlerFunction);
+    use(routeOrHandler: string | HandlerFunction, handler?: HandlerFunction) {
+        if (typeof routeOrHandler === 'string' && handler) {
+            const route = routeOrHandler;
+            this.rules.splice(this.rules.length - 1, 0, {
+                pattern: new UrlPattern(route),
+                handler,
+            });
+            return;
+        }
+
+        if (typeof routeOrHandler === 'function') {
+            const handler = routeOrHandler;
+            this.rules.splice(this.rules.length - 1, 0, {
+                pattern: new UrlPattern('*'),
+                handler,
+            });
+            return;
+        }
+
+        throw new Error('You must provide a handler function')
     }
 
     /*
