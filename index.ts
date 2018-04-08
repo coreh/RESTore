@@ -11,12 +11,36 @@ enum StoreEntryState {
     Stale,
 }
 
+
+/**
+ * Request options
+ */
+
 export interface Options {
+
+    /**
+     * Request method
+     */
+
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+
+    /**
+     * Request body
+     */
+
     body?: any;
 }
 
+/**
+ * A Resource to be stored or retrieved
+ */
+
 export interface Resource {
+
+    /**
+     * Resource path
+     */
+
     [Path]?: string;
 }
 
@@ -26,7 +50,19 @@ interface StoreEntry {
     resource?: any;
 }
 
+/**
+ * A Function to handle store requests
+ */
+
 export interface HandlerFunction {
+
+    /**
+     * @param params: Route params
+     * @param options: Request options
+     * @param path: Request path
+     * @param next: Call next handler in the chain
+     */
+
     (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>): AsyncIterator<Resource> | Promise<Resource>
 }
 
@@ -133,6 +169,12 @@ export class RESTore {
 
         return stored.resource;
     }
+
+    /**
+     * Fetch a resource from the store
+     * @param path Resource path
+     * @param options Options
+     */
 
     async fetch<T = any>(path: string, options: Options = { method: 'GET' }): Promise<T | undefined> {
         if (options.method == 'GET') {
