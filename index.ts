@@ -202,13 +202,13 @@ export class RESTore {
                 const resource = await promiseOrAsyncIterator;
                 this.store.set(resource[Path] || path, {
                     state: StoreEntryState.Fresh,
-                    resource,
+                    resource: JSON.parse(JSON.stringify(resource)),
                 })
             } else {
                 for await (const resource of promiseOrAsyncIterator) {
                     this.store.set(resource[Path] || path, {
                         state: StoreEntryState.Fresh,
-                        resource,
+                        resource: JSON.parse(JSON.stringify(resource)),
                     })
                 }
             }
