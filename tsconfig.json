@@ -9,5 +9,8 @@
         "target": "es5",
         "downlevelIteration": true,
         "strictNullChecks": true
-    }
+    },
+    "exclude": [
+        "example.ts"
+    ]
 }
