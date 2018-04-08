@@ -35,8 +35,10 @@ async function main() {
         likes: ['Chocolate', 'Coffee'],
     });
 
+    await store.patch('/users/coreh', { singing: true });
+
     const user = await store.get('/users/coreh');
-    console.log(user); // { username: 'coreh', likes: ['Chocolate', 'Coffee'] }
+    console.log(user); // { username: 'coreh', likes: ['Chocolate', 'Coffee'], singing: true }
 }
 
 main();
