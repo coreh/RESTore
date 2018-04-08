@@ -132,37 +132,6 @@ export class RESTore {
         return stored.resource;
     }
 
-    async get<T = any>(path: string): Promise<T | undefined> {
-        return this.fetch<T>(path);
-    }
-
-    async post<T = any>(path: string, body: T): Promise<T | undefined> {
-        return this._fetch<T>(path, {
-            method: 'POST',
-            body,
-        });
-    }
-
-    async put<T = any>(path: string, body: T): Promise<T | undefined> {
-        return this._fetch<T>(path, {
-            method: 'PUT',
-            body,
-        });
-    }
-
-    async patch<T = any>(path: string, body: T): Promise<T | undefined> {
-        return this._fetch<T>(path, {
-            method: 'PATCH',
-            body,
-        });
-    }
-
-    async delete<T = any>(path: string): Promise<T | undefined> {
-        return this._fetch<T>(path, {
-            method: 'DELETE',
-        });
-    }
-
     async fetch<T = any>(path: string, options: Options = { method: 'GET' }): Promise<T | undefined> {
         if (options.method == 'GET') {
             const stored = this.store.get(path);
@@ -208,6 +177,41 @@ export class RESTore {
         this.rules.unshift({
             pattern: new UrlPattern(route),
             handler,
+        });
+    }
+
+    /*
+     * Convenience Methods
+     */
+
+    async get<T = any>(path: string): Promise<T | undefined> {
+        return this.fetch<T>(path);
+    }
+
+    async post<T = any>(path: string, body: T): Promise<T | undefined> {
+        return this._fetch<T>(path, {
+            method: 'POST',
+            body,
+        });
+    }
+
+    async put<T = any>(path: string, body: T): Promise<T | undefined> {
+        return this._fetch<T>(path, {
+            method: 'PUT',
+            body,
+        });
+    }
+
+    async patch<T = any>(path: string, body: T): Promise<T | undefined> {
+        return this._fetch<T>(path, {
+            method: 'PATCH',
+            body,
+        });
+    }
+
+    async delete<T = any>(path: string): Promise<T | undefined> {
+        return this._fetch<T>(path, {
+            method: 'DELETE',
         });
     }
 }
