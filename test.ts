@@ -1,4 +1,4 @@
-import RESTore from '.';
+import RESTore, { Path } from '.';
 
 const store = new RESTore();
 
@@ -11,12 +11,12 @@ store.register('/users/:id', async function* (params, options, path) {
     }
 });
 
-store.register('/users', async function* (params, options) {
+store.register('/users', async function (params, options) {
     switch (options.method) {
         case 'POST':
-            return yield {
-                path: `/users/${options.body.id}`,
-                body: options.body,
+            return {
+                [Path]: `/users/${options.body.id}`,
+                ...options.body,
             };
         default:
             throw new Error('Unsupported method');

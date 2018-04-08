@@ -3,6 +3,8 @@ import UrlPattern from 'url-pattern';
 
 (Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol.for("Symbol.asyncIterator");
 
+export const Path = Symbol.for('Path');
+
 enum StoreEntryState {
     Loading,
     Fresh,
@@ -15,18 +17,17 @@ export interface Options {
 }
 
 export interface Resource {
-    path: string;
-    body: any;
+    [Path]?: string;
 }
 
 interface StoreEntry {
     state: StoreEntryState;
     promise?: Promise<any>
-    body?: any;
+    resource?: any;
 }
 
 export interface HandlerFunction {
-    (this: RESTore, params: any, options: Options, path: string): AsyncIterator<Resource> | Promise<any>
+    (this: RESTore, params: any, options: Options, path: string): AsyncIterator<Resource> | Promise<Resource>
 }
 
 interface Rule {
@@ -128,7 +129,7 @@ export class RESTore {
         if (stored.state === StoreEntryState.Stale) {
             this._fetch(path);
         }
-        return stored.body;
+        return stored.resource;
     }
 
     async get<T = any>(path: string): Promise<T | undefined> {
@@ -169,7 +170,7 @@ export class RESTore {
                 if (stored.promise) {
                     return stored.promise;
                 }
-                return stored.body;
+                return stored.resource;
             }
         }
         return this._fetch(path, options);
@@ -181,22 +182,22 @@ export class RESTore {
             if (match) {
                 const promiseOrAsyncIterator = rule.handler.call(this, match, options, path);
                 if (promiseOrAsyncIterator.then) {
-                    const body = await promiseOrAsyncIterator;
-                    this.store.set(path, {
+                    const resource = await promiseOrAsyncIterator;
+                    this.store.set(resource[Path] || path, {
                         state: StoreEntryState.Fresh,
-                        body,
+                        resource,
                     })
                 } else {
                     for await (const resource of promiseOrAsyncIterator) {
-                        this.store.set(resource.path, {
+                        this.store.set(resource[Path] || path, {
                             state: StoreEntryState.Fresh,
-                            body: resource.body,
+                            resource,
                         })
                     }
                 }
                 const stored = this.store.get(path);
                 if (stored !== undefined) {
-                    return stored.body;
+                    return stored.resource;
                 }
                 return;
             }
