@@ -2,9 +2,9 @@
 
 RESTful data store.
 
-<center>
+<p align="center">
 <img src="logo.png" width="256" height="256">
-</center>
+</p>
 
 ## Introduction
 
@@ -92,4 +92,4 @@ console.log(user); // { username: 'coreh', likes: ['Chocolate', 'Coffee'] }
 
 ## License
 
-MIT, see [LICENSE](LICENSE)
+MIT, see [LICENSE](LICENSE).
