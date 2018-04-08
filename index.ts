@@ -27,7 +27,7 @@ interface StoreEntry {
 }
 
 export interface HandlerFunction {
-    (this: RESTore, params: any, options: Options, path: string): AsyncIterator<Resource> | Promise<Resource>
+    (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void> ): AsyncIterator<Resource> | Promise<Resource>
 }
 
 interface Rule {
@@ -147,32 +147,36 @@ export class RESTore {
         return this._fetch(path, options);
     }
 
-    private async _fetch<T = any>(path: string, options: Options = { method: 'GET' }): Promise<T | undefined> {
-        for (const rule of this.rules) {
-            const match = rule.pattern.match(path);
-            if (match) {
-                const promiseOrAsyncIterator = rule.handler.call(this, match, options, path);
-                if (promiseOrAsyncIterator.then) {
-                    const resource = await promiseOrAsyncIterator;
+    private async _fetch<T = any>(path: string, options: Options = { method: 'GET' }, index: number = 0): Promise<T | undefined> {
+        const next = async () => await this._fetch(path, options, index + 1);
+        const rule = this.rules[index];
+        if (!rule) {
+            return undefined;
+        }
+        const match = rule.pattern.match(path);
+        if (match) {
+            const promiseOrAsyncIterator = rule.handler.call(this, match, options, path, next);
+            if (promiseOrAsyncIterator.then) {
+                const resource = await promiseOrAsyncIterator;
+                this.store.set(resource[Path] || path, {
+                    state: StoreEntryState.Fresh,
+                    resource,
+                })
+            } else {
+                for await (const resource of promiseOrAsyncIterator) {
                     this.store.set(resource[Path] || path, {
                         state: StoreEntryState.Fresh,
                         resource,
                     })
-                } else {
-                    for await (const resource of promiseOrAsyncIterator) {
-                        this.store.set(resource[Path] || path, {
-                            state: StoreEntryState.Fresh,
-                            resource,
-                        })
-                    }
                 }
-                const stored = this.store.get(path);
-                if (stored !== undefined) {
-                    return stored.resource;
-                }
-                return;
             }
+            const stored = this.store.get(path);
+            if (stored !== undefined) {
+                return stored.resource;
+            }
+            return;
         }
+        return next();
     }
 
     use(route: string, handler: HandlerFunction) {
