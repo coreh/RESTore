@@ -1,6 +1,5 @@
 # RESTore
 
-
 <p align="center">
 <img src="https://github.com/coreh/RESTore/raw/master/logo.png" width="256" height="256"><br>
 <strong>RESTful Data Store</strong>
@@ -46,7 +45,7 @@ RESTore is inspired by the following APIs/concepts:
 ### Store Definition
 
 ```js
-import RESTore from 'rest-ore';
+import RESTore from '@coreh/restore';
 
 const store = new RESTore();
 
