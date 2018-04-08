@@ -53,8 +53,6 @@ const store = new RESTore();
 
 store.use('/users/:id', async function(params, options, path, next) {
     switch (options.method) {
-        case 'GET':
-            return this.stored(path);
         case 'PATCH':
             const stored = this.stored(path);
             return {
