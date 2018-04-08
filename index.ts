@@ -104,31 +104,31 @@ export class RESTore {
         this.register('*', endpoint(baseURL));
     }
 
-    stored(path): StoreEntry {
+    stored<T = any>(path: string): T | undefined {
         const stored = this.store.get(path);
         if (stored) {
-            return stored;
+            return stored.resource;
         }
-
-        const entry = {
-            state: StoreEntryState.Loading,
-            promise: this.fetch(path),
-            path,
-        }
-
-        this.store.set(path, entry);
-
-        return entry;
     }
 
     expect<T = any>(path: string): T {
-        let stored = this.stored(path);
-        if (stored.state === StoreEntryState.Loading) {
-            throw stored.promise;
+        const stored = this.store.get(path);
+        if (stored === undefined) {
+            const entry = {
+                state: StoreEntryState.Loading,
+                promise: this.fetch(path),
+                path,
+            }
+
+            this.store.set(path, entry);
+
+            throw entry.promise;
         }
+
         if (stored.state === StoreEntryState.Stale) {
             this._fetch(path);
         }
+
         return stored.resource;
     }
 
