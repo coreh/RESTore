@@ -16,7 +16,7 @@ RESTore's API is fully asynchronous, and meant to go hand-in-hand with the new s
 
 ### Development Status
 
-This library is still on its early days, and is certainly not suitable for production. Expect significant changes as the API is polished.
+This library is still on its early days, and is certainly not suitable for production. Expect significant changes as the API gets polished.
 
 ### Key inspirations
 
