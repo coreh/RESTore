@@ -140,8 +140,13 @@ export class RESTore {
     private store: Map<string, StoreEntry> = new Map();
 
     constructor() {
-        this.use(async function(params, options, path, next) {
-            throw new Error(`Not supported: ${options.method} ${path}`);
+        this.use(async function (params, options, path, next) {
+            switch (options.method) {
+                case 'GET':
+                    return this.stored(path);
+                default:
+                    throw new Error(`Not supported: ${options.method} ${path}`);
+            }
         });
     }
 
