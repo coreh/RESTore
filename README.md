@@ -101,6 +101,20 @@ store.use(RESTore.endpoint('https://api.example.com/'));
 store.get(`/flights/${airport}`)
 ```
 
+### Integrating with React "Suspense"
+
+```jsx
+const Weather = (props) => {
+    // TAKE -> GET, but will throw promise if not fetched
+    const weather = store.take(`/weather/${props.location}`);
+    return (
+        <div>
+            <p>Temperature: {weather.temperature}</p>
+            <p>Humidity: {weather.humidity}</p>
+        </div>
+    )
+```
+
 ### Yield multiple resources (Async Generators)
 
 TODO
