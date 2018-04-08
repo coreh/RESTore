@@ -208,16 +208,24 @@ export class RESTore {
             const promiseOrAsyncIterator = rule.handler.call(this, match, options, path, next);
             if (promiseOrAsyncIterator.then) {
                 const resource = await promiseOrAsyncIterator;
-                this.store.set(resource[Path] || path, {
-                    state: StoreEntryState.Fresh,
-                    resource: JSON.parse(JSON.stringify(resource)),
-                })
-            } else {
-                for await (const resource of promiseOrAsyncIterator) {
+                if (resource) {
                     this.store.set(resource[Path] || path, {
                         state: StoreEntryState.Fresh,
                         resource: JSON.parse(JSON.stringify(resource)),
                     })
+                } else {
+                    this.store.delete(path);
+                }
+            } else {
+                for await (const resource of promiseOrAsyncIterator) {
+                    if (resource) {
+                        this.store.set(resource[Path] || path, {
+                            state: StoreEntryState.Fresh,
+                            resource: JSON.parse(JSON.stringify(resource)),
+                        })
+                    } else {
+                        this.store.delete(path);
+                    }
                 }
             }
             const stored = this.store.get(path);
