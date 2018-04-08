@@ -180,7 +180,7 @@ export class RESTore {
     }
 
     use(route: string, handler: HandlerFunction) {
-        this.rules.unshift({
+        this.rules.splice(this.rules.length - 1, 0, {
             pattern: new UrlPattern(route),
             handler,
         });
