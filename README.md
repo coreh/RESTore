@@ -41,6 +41,7 @@ RESTore is inspired by the following APIs/concepts:
 | Action Type    | HTTP Verb (`GET`, `POST`, `PUT`, ...)                    |
 | Action Creator | Convenience Methods (`.get()`, `.post()`, `.put()`, ...) |
 | Selector       | Path                                                     |
+| `.subscribe()` | `.subscribe()`                                           |
 
 ## Sample Application
 
