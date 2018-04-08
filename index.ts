@@ -179,8 +179,19 @@ export class RESTore {
         return next();
     }
 
+    /**
+     * Install a global handler function
+     */
+
     use(handler: HandlerFunction): this;
+
+    /**
+     * Install a handler function for a specific route
+     * (e.g. '/users/:id')
+     */
+
     use(route: string, handler: HandlerFunction): this;
+
     use(routeOrHandler: string | HandlerFunction, handler?: HandlerFunction): this {
         if (typeof routeOrHandler === 'string' && handler) {
             const route = routeOrHandler;
@@ -207,9 +218,20 @@ export class RESTore {
      * Convenience Methods
      */
 
+    /**
+     * GET a resource from the store
+     * @param path A path to GET
+     */
+
     async get<T = any>(path: string): Promise<T | undefined> {
         return this.fetch<T>(path);
     }
+
+    /**
+     * POST to the specified path
+     * @param path A path to POST
+     * @param body Body for the POST request
+     */
 
     async post<T = any>(path: string, body: T): Promise<T | undefined> {
         return this._fetch<T>(path, {
@@ -218,6 +240,12 @@ export class RESTore {
         });
     }
 
+    /**
+     * PUT the resource at the specified path
+     * @param path A path to PUT
+     * @param body Body for the PUT request
+     */
+
     async put<T = any>(path: string, body: T): Promise<T | undefined> {
         return this._fetch<T>(path, {
             method: 'PUT',
@@ -225,12 +253,23 @@ export class RESTore {
         });
     }
 
+    /**
+     * PATCH the resource at the specified path
+     * @param path A path to PATCH
+     * @param body Body for the PATCH request
+     */
+
     async patch<T = any>(path: string, body: T): Promise<T | undefined> {
         return this._fetch<T>(path, {
             method: 'PATCH',
             body,
         });
     }
+
+    /**
+     * DELETE the resource at the specified path
+     * @param path A path to DELETE
+     */
 
     async delete<T = any>(path: string): Promise<T | undefined> {
         return this._fetch<T>(path, {
