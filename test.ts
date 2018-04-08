@@ -1,4 +1,4 @@
-import RESTore, { Path } from '.';
+import RESTore from '.';
 
 const store = new RESTore();
 
@@ -15,7 +15,7 @@ store.register('/users', async function (params, options) {
     switch (options.method) {
         case 'POST':
             return {
-                [Path]: `/users/${options.body.id}`,
+                [RESTore.Path]: `/users/${options.body.id}`,
                 ...options.body,
             };
         default:

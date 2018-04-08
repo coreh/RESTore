@@ -3,7 +3,7 @@ import UrlPattern from 'url-pattern';
 
 (Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol.for("Symbol.asyncIterator");
 
-export const Path = Symbol.for('Path');
+export const Path = Symbol.for('RESTore.Path');
 
 enum StoreEntryState {
     Loading,
@@ -97,6 +97,8 @@ export function endpoint(baseURL: string) {
 }
 
 export class RESTore {
+    static Path = Path;
+
     private rules: Rule[] = [];
     private store: Map<string, StoreEntry> = new Map();
 
