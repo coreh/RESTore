@@ -11,7 +11,6 @@ enum StoreEntryState {
     Stale,
 }
 
-
 /**
  * Request options
  */
@@ -64,6 +63,14 @@ export interface HandlerFunction {
      */
 
     (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>): AsyncIterator<Resource> | Promise<Resource>
+}
+
+/**
+ * A function that listens for changes in the store
+ */
+
+export interface ListenerFunction {
+    (this: RESTore): void;
 }
 
 interface Rule {
@@ -137,6 +144,7 @@ export class RESTore {
     static endpoint = endpoint;
 
     private rules: Rule[] = [];
+    private listeners: ListenerFunction[] = [];
     private store: Map<string, StoreEntry> = new Map();
 
     constructor() {
@@ -216,6 +224,7 @@ export class RESTore {
                 } else {
                     this.store.delete(path);
                 }
+                this.notify();
             } else {
                 for await (const resource of promiseOrAsyncIterator) {
                     if (resource) {
@@ -226,6 +235,7 @@ export class RESTore {
                     } else {
                         this.store.delete(path);
                     }
+                    this.notify();
                 }
             }
             const stored = this.store.get(path);
@@ -235,6 +245,12 @@ export class RESTore {
             return;
         }
         return next();
+    }
+
+    private notify() {
+        for (const listener of this.listeners) {
+            Promise.resolve().then(() => listener.call(this));
+        }
     }
 
     /**
@@ -270,6 +286,10 @@ export class RESTore {
         }
 
         throw new Error('You must provide a handler function')
+    }
+
+    subscribe(listener: ListenerFunction) {
+        this.listeners.push(listener);
     }
 
     /*
