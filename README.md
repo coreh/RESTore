@@ -2,7 +2,9 @@
 
 <p align="center">
 <img src="https://github.com/coreh/RESTore/raw/master/logo.png" width="256" height="256"><br>
-<strong>RESTful Data Store</strong>
+<strong>RESTful Data Store</strong><br><br>
+<img src="https://img.shields.io/npm/v/@coreh/restore.svg">
+<img src="https://img.shields.io/npm/l/@coreh/restore.svg">
 </p>
 
 ## Introduction
@@ -105,7 +107,7 @@ store.get(`/flights/${airport}`)
 
 ```jsx
 const Weather = (props) => {
-    // TAKE -> GET, but will throw promise if not fetched
+    // .take() -> .get(), but will throw promise if not fetched
     const weather = store.take(`/weather/${props.location}`);
     return (
         <div>
@@ -113,6 +115,7 @@ const Weather = (props) => {
             <p>Humidity: {weather.humidity}</p>
         </div>
     )
+}
 ```
 
 ### Yield multiple resources (Async Generators)
