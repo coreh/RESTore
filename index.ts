@@ -179,16 +179,16 @@ export class RESTore {
         return next();
     }
 
-    use(handler: HandlerFunction);
-    use(route: string, handler: HandlerFunction);
-    use(routeOrHandler: string | HandlerFunction, handler?: HandlerFunction) {
+    use(handler: HandlerFunction): this;
+    use(route: string, handler: HandlerFunction): this;
+    use(routeOrHandler: string | HandlerFunction, handler?: HandlerFunction): this {
         if (typeof routeOrHandler === 'string' && handler) {
             const route = routeOrHandler;
             this.rules.splice(this.rules.length - 1, 0, {
                 pattern: new UrlPattern(route),
                 handler,
             });
-            return;
+            return this;
         }
 
         if (typeof routeOrHandler === 'function') {
@@ -197,7 +197,7 @@ export class RESTore {
                 pattern: new UrlPattern('*'),
                 handler,
             });
-            return;
+            return this;
         }
 
         throw new Error('You must provide a handler function')
