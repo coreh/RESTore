@@ -103,7 +103,7 @@ export class RESTore {
     private store: Map<string, StoreEntry> = new Map();
 
     constructor(baseURL: string = '') {
-        this.use('*', endpoint(baseURL));
+        this.use(endpoint(baseURL));
     }
 
     stored<T = any>(path: string): T | undefined {
