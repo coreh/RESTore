@@ -113,7 +113,7 @@ export class RESTore {
         }
     }
 
-    expect<T = any>(path: string): T {
+    take<T = any>(path: string): T {
         const stored = this.store.get(path);
         if (stored === undefined) {
             const entry = {
