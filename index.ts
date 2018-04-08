@@ -103,7 +103,7 @@ export class RESTore {
     private store: Map<string, StoreEntry> = new Map();
 
     constructor(baseURL: string = '') {
-        this.register('*', endpoint(baseURL));
+        this.use('*', endpoint(baseURL));
     }
 
     stored<T = any>(path: string): T | undefined {
@@ -175,7 +175,7 @@ export class RESTore {
         }
     }
 
-    register(route: string, handler: HandlerFunction) {
+    use(route: string, handler: HandlerFunction) {
         this.rules.unshift({
             pattern: new UrlPattern(route),
             handler,

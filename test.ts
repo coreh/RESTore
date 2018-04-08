@@ -2,7 +2,7 @@ import RESTore from '.';
 
 const store = new RESTore();
 
-store.register('/users/:id', async function* (params, options, path) {
+store.use('/users/:id', async function* (params, options, path) {
     switch (options.method) {
         case 'GET':
             return yield this.stored(path);
@@ -11,7 +11,7 @@ store.register('/users/:id', async function* (params, options, path) {
     }
 });
 
-store.register('/users', async function (params, options) {
+store.use('/users', async function (params, options) {
     switch (options.method) {
         case 'POST':
             return {
