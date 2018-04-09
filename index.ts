@@ -178,7 +178,7 @@ export class RESTore {
         if (stored === undefined) {
             const entry = {
                 state: StoreEntryState.Loading,
-                promise: this.fetch(path),
+                promise: this._fetch(path),
                 path,
             }
 
@@ -191,7 +191,11 @@ export class RESTore {
             this._fetch(path);
         }
 
-        return stored.resource;
+        if (stored.resource !== undefined) {
+            return stored.resource;
+        }
+
+        throw stored.promise;
     }
 
     /**
