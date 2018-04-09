@@ -2,24 +2,28 @@ import RESTore from '.';
 
 const store = new RESTore();
 
-store.use('/users/:id', async function (params, options, path, next) {
-    switch (options.method) {
+store.use('/users/:id', async function ({ method, body, path }, next) {
+    switch (method) {
         case 'PATCH':
+            const stored = this.stored(path);
+            if (stored === undefined) {
+                throw new Error('User does not exist');
+            }
             return {
-                ...this.stored(path),
-                ...options.body,
+                ...stored,
+                ...body,
             };
         default:
             return next();
     }
 });
 
-store.use('/users', async function (params, options, path, next) {
-    switch (options.method) {
+store.use('/users', async function ({ method, body, path }, next) {
+    switch (method) {
         case 'POST':
             return {
-                [RESTore.Path]: ['users', options.body.username], // Same as  `/users/${options.body.username}`
-                ...options.body,
+                [RESTore.Path]: ['users', body.username], // Same as `/users/${body.username}`
+                ...body,
             };
         default:
             return next();

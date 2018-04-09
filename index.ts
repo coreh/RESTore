@@ -12,6 +12,8 @@ enum StoreEntryState {
     Stale,
 }
 
+type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+
 /**
  * Request options
  */
@@ -22,7 +24,7 @@ export interface Options {
      * Request method
      */
 
-    method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+    method: Method;
 
     /**
      * Request body
@@ -58,6 +60,15 @@ interface StoreEntry {
 
 export type Path = string | (string | number)[];
 
+export interface HandlerContext {
+    params: { [key: string]: string | undefined };
+    options: Options;
+    method: Method;
+    body?: any;
+    path: string;
+    store: RESTore;
+}
+
 /**
  * A Function to handle store requests
  * @param params: Route params
@@ -66,7 +77,7 @@ export type Path = string | (string | number)[];
  * @param next: Call next handler in the chain
  */
 
-export type HandlerFunction = (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>) => AsyncIterable<Resource> | Promise<Resource>;
+export type HandlerFunction = (this: RESTore, context: HandlerContext, next: () => Promise<void>) => AsyncIterable<Resource> | Promise<Resource>;
 
 /**
  * A function that listens for changes in the store
@@ -79,7 +90,7 @@ interface Rule {
     handler: HandlerFunction;
 }
 
-export function endpoint(baseURL: string) {
+export function endpoint(baseURL: string): HandlerFunction {
     if (baseURL.endsWith('/')) {
         baseURL.slice(0, baseURL.length - 1);
     }
@@ -88,7 +99,7 @@ export function endpoint(baseURL: string) {
         return new Error(`Received status ${status} while attempting to ${method} ${path}`);
     }
 
-    return async function* (params, options, path) {
+    return async function* ({ params, options, method, path }) {
 
         const fullPath = baseURL + path;
 
@@ -101,7 +112,7 @@ export function endpoint(baseURL: string) {
             body = await response.text();
         }
 
-        switch (options.method) {
+        switch (method) {
             case 'GET':
                 if (response.status === 200) {
                     return yield {
@@ -109,7 +120,7 @@ export function endpoint(baseURL: string) {
                         body,
                     };
                 } else {
-                    throw statusError(response.status, options.method, fullPath);
+                    throw statusError(response.status, method, fullPath);
                 }
             case 'PUT':
             case 'PATCH':
@@ -119,7 +130,7 @@ export function endpoint(baseURL: string) {
                         body,
                     };
                 } else {
-                    throw statusError(response.status, options.method, fullPath);
+                    throw statusError(response.status, method, fullPath);
                 }
             case 'DELETE':
                 if (response.status === 200 || response.status === 201) {
@@ -128,13 +139,13 @@ export function endpoint(baseURL: string) {
                         body: undefined,
                     };
                 } else {
-                    throw statusError(response.status, options.method, fullPath);
+                    throw statusError(response.status, method, fullPath);
                 }
             case 'POST':
                 if (response.status === 200 || response.status === 201) {
                     // Do nothing
                 } else {
-                    throw statusError(response.status, options.method, fullPath);
+                    throw statusError(response.status, method, fullPath);
                 }
         }
     };
@@ -150,7 +161,7 @@ export class RESTore {
     private store: Map<string, StoreEntry> = new Map();
 
     constructor() {
-        this.use(async function (params, options, path, next) {
+        this.use(async function ({ params, options, path }) {
             switch (options.method) {
                 case 'GET':
                     return this.stored(path);
@@ -246,7 +257,15 @@ export class RESTore {
         const canonizedPath = this.canonize(path);
         const match = rule.pattern.match(canonizedPath);
         if (match) {
-            const promiseOrAsyncIterator = rule.handler.call(this, match, options, canonizedPath, next);
+            const context = {
+                params: match,
+                options,
+                method: options.method,
+                body: options.body,
+                path: canonizedPath,
+                store: this,
+            };
+            const promiseOrAsyncIterator = rule.handler.call(this, context, next);
             if (promiseOrAsyncIterator.then) {
                 const resource = await promiseOrAsyncIterator;
                 this.set(canonizedPath, resource);
