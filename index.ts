@@ -69,7 +69,7 @@ export interface HandlerFunction {
      * @param next: Call next handler in the chain
      */
 
-    (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>): AsyncIterator<Resource> | Promise<Resource>
+    (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>): AsyncIterable<Resource> | Promise<Resource>
 }
 
 /**
@@ -204,7 +204,7 @@ export class RESTore {
         if (options.method == 'GET') {
             const stored = this.store.get(path);
             if (stored !== undefined) {
-                if (stored.resource) {
+                if (stored.resource !== undefined) {
                     return stored.resource;
                 }
                 return stored.promise;
@@ -227,18 +227,32 @@ export class RESTore {
                 this.set(path, resource);
                 this.notify();
             } else {
-                for await (const resource of promiseOrAsyncIterator) {
-                    this.set(path, resource);
-                    this.notify();
-                }
+                await new Promise((resolve, reject) => {
+                    this.consume(promiseOrAsyncIterator, path, resolve)
+                        .then(() => resolve())
+                        .catch(reject);
+                });
             }
             const stored = this.store.get(path);
             if (stored !== undefined) {
-                return stored.resource;
+                if (stored.resource !== undefined) {
+                    return stored.resource;
+                }
+                return stored.promise;
             }
             return;
         }
         return next();
+    }
+
+    private async consume<T>(asyncIterator: AsyncIterable<Resource | undefined>, path: string, resolve: () => void) {
+        for await (const resource of asyncIterator) {
+            const pathSet = this.set(path, resource);
+            if (pathSet === path) {
+                resolve();
+            }
+            this.notify();
+        }
     }
 
     private set(defaultPath: string, resource: any) {
@@ -259,6 +273,7 @@ export class RESTore {
         } else {
             this.store.delete(path);
         }
+        return path;
     }
 
     private notify() {
