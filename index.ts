@@ -41,7 +41,7 @@ export interface Resource {
      * Resource path
      */
 
-    [Path]?: string;
+    [Path]?: Path;
 
     /**
      * Resource content
@@ -55,6 +55,8 @@ interface StoreEntry {
     promise?: Promise<any>
     resource?: any;
 }
+
+export type Path = string | (string | number)[];
 
 /**
  * A Function to handle store requests
@@ -166,28 +168,29 @@ export class RESTore {
         });
     }
 
-    stored<T = any>(path: string): T | undefined {
-        const stored = this.store.get(path);
+    stored<T = any>(path: Path): T | undefined {
+        const stored = this.store.get(this.canonize(path));
         if (stored) {
             return stored.resource;
         }
     }
 
-    take<T = any>(path: string): T {
-        const stored = this.store.get(path);
+    take<T = any>(path: Path): T {
+        const canonizedPath = this.canonize(path);
+        const stored = this.store.get(canonizedPath);
         if (stored === undefined) {
             const entry = {
                 state: StoreEntryState.Loading,
-                promise: this._fetch(path),
+                promise: this._fetch(canonizedPath),
             }
 
-            this.store.set(path, entry);
+            this.store.set(canonizedPath, entry);
 
             throw entry.promise;
         }
 
         if (stored.state === StoreEntryState.Stale) {
-            this._fetch(path);
+            this._fetch(canonizedPath);
         }
 
         if (stored.resource !== undefined) {
@@ -203,9 +206,10 @@ export class RESTore {
      * @param options Options
      */
 
-    async fetch<T = any>(path: string, options: Options = { method: 'GET' }): Promise<T | undefined> {
+    async fetch<T = any>(path: Path, options: Options = { method: 'GET' }): Promise<T | undefined> {
         if (options.method == 'GET') {
-            const stored = this.store.get(path);
+            const canonizedPath = this.canonize(path);
+            const stored = this.store.get(canonizedPath);
             if (stored !== undefined) {
                 if (stored.resource !== undefined) {
                     return stored.resource;
@@ -213,9 +217,9 @@ export class RESTore {
                 return stored.promise;
             }
 
-            const promise = this._fetch(path, options);
+            const promise = this._fetch(canonizedPath, options);
 
-            this.store.set(path, {
+            this.store.set(canonizedPath, {
                 state: StoreEntryState.Loading,
                 promise,
             });
@@ -225,27 +229,36 @@ export class RESTore {
         return this._fetch(path, options);
     }
 
-    private async _fetch<T = any>(path: string, options: Options = { method: 'GET' }, index: number = 0): Promise<T | undefined> {
+    /**
+     * Canonizes a path to string form
+     * @param path Path to be canonized
+     */
+    private canonize(path: Path) {
+        return typeof path === 'string' ? path : '/' + path.map(encodeURIComponent).join('/');
+    }
+
+    private async _fetch<T = any>(path: Path, options: Options = { method: 'GET' }, index: number = 0): Promise<T | undefined> {
         const next = async () => await this._fetch(path, options, index + 1);
         const rule = this.rules[index];
         if (!rule) {
             return undefined;
         }
-        const match = rule.pattern.match(path);
+        const canonizedPath = this.canonize(path);
+        const match = rule.pattern.match(canonizedPath);
         if (match) {
-            const promiseOrAsyncIterator = rule.handler.call(this, match, options, path, next);
+            const promiseOrAsyncIterator = rule.handler.call(this, match, options, canonizedPath, next);
             if (promiseOrAsyncIterator.then) {
                 const resource = await promiseOrAsyncIterator;
-                this.set(path, resource);
+                this.set(canonizedPath, resource);
                 this.notify();
             } else {
                 await new Promise((resolve, reject) => {
-                    this.consume(promiseOrAsyncIterator, path, resolve)
+                    this.consume(promiseOrAsyncIterator, canonizedPath, resolve)
                         .then(() => resolve())
                         .catch(reject);
                 });
             }
-            const stored = this.store.get(path);
+            const stored = this.store.get(canonizedPath);
             if (stored !== undefined) {
                 if (stored.resource !== undefined) {
                     return stored.resource;
@@ -257,7 +270,7 @@ export class RESTore {
         return next();
     }
 
-    private async consume<T>(asyncIterator: AsyncIterable<Resource | undefined>, path: string, resolve: () => void) {
+    private async consume<T>(asyncIterator: AsyncIterable<Resource | undefined>, path: Path, resolve: () => void) {
         for await (const resource of asyncIterator) {
             const pathSet = this.set(path, resource);
             if (pathSet === path) {
@@ -267,9 +280,9 @@ export class RESTore {
         }
     }
 
-    private set(defaultPath: string, resource: any) {
+    private set(defaultPath: Path, resource: any) {
         let content;
-        let path;
+        let path: Path;
         if (typeof resource === 'object') {
             path = resource[Path] || defaultPath;
             content = {}.hasOwnProperty.call(resource, Content) ? resource[Content] : resource;
@@ -278,12 +291,12 @@ export class RESTore {
             content = resource;
         }
         if (content !== undefined) {
-            this.store.set(path, {
+            this.store.set(this.canonize(path), {
                 state: StoreEntryState.Fresh,
                 resource: JSON.parse(JSON.stringify(content)),
             });
         } else {
-            this.store.delete(path);
+            this.store.delete(this.canonize(path));
         }
         return path;
     }
@@ -342,7 +355,7 @@ export class RESTore {
      * @param path A path to GET
      */
 
-    async get<T = any>(path: string): Promise<T | undefined> {
+    async get<T = any>(path: Path): Promise<T | undefined> {
         return this.fetch<T>(path);
     }
 
@@ -352,7 +365,7 @@ export class RESTore {
      * @param body Body for the POST request
      */
 
-    async post<T = any>(path: string, body: T): Promise<T | undefined> {
+    async post<T = any>(path: Path, body: T): Promise<T | undefined> {
         return this._fetch<T>(path, {
             method: 'POST',
             body,
@@ -365,7 +378,7 @@ export class RESTore {
      * @param body Body for the PUT request
      */
 
-    async put<T = any>(path: string, body: T): Promise<T | undefined> {
+    async put<T = any>(path: Path, body: T): Promise<T | undefined> {
         return this._fetch<T>(path, {
             method: 'PUT',
             body,
@@ -378,7 +391,7 @@ export class RESTore {
      * @param body Body for the PATCH request
      */
 
-    async patch<T = any>(path: string, body: T): Promise<T | undefined> {
+    async patch<T = any>(path: Path, body: T): Promise<T | undefined> {
         return this._fetch<T>(path, {
             method: 'PATCH',
             body,
@@ -390,7 +403,7 @@ export class RESTore {
      * @param path A path to DELETE
      */
 
-    async delete<T = any>(path: string): Promise<T | undefined> {
+    async delete<T = any>(path: Path): Promise<T | undefined> {
         return this._fetch<T>(path, {
             method: 'DELETE',
         });

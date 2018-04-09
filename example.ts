@@ -18,7 +18,7 @@ store.use('/users', async function (params, options, path, next) {
     switch (options.method) {
         case 'POST':
             return {
-                [RESTore.Path]: `/users/${options.body.username}`,
+                [RESTore.Path]: ['users', options.body.username], // Same as  `/users/${options.body.username}`
                 ...options.body,
             };
         default:
