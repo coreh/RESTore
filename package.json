@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "isomorphic-fetch": "^2.2.1",
+        "tslint": "^5.9.1",
         "url-pattern": "^1.0.3"
     },
     "devDependencies": {
@@ -16,6 +17,7 @@
     },
     "scripts": {
         "prepare": "tsc --project . --declaration",
-        "clean": "rm -f *.js *.d.ts"
+        "clean": "rm -f *.js *.d.ts",
+        "lint": "tslint -c tslint.json '**/*.ts' --exclude '**/node_modules/**'"
     }
 }
