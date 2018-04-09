@@ -261,12 +261,12 @@ export class RESTore {
         const match = rule.pattern.match(canonizedPath);
         if (match) {
             context = Object.assign({
-                get params() { return match; },
-                get options() { return options; },
-                get method() { return method; },
-                get body() { return body; },
-                get path() { return canonizedPath; },
-                get store() { return store; },
+                get params() { return match; }, set params(value) { return; },
+                get options() { return options; }, set options(value) { return; },
+                get method() { return method; }, set method(value) { return; },
+                get body() { return body; }, set body(value) { return; },
+                get path() { return canonizedPath; }, set path(value) { return; },
+                get store() { return store; }, set store(value) { return; },
             }, context);
             const promiseOrAsyncIterator = rule.handler.call(this, context, next);
             if (promiseOrAsyncIterator.then) {
