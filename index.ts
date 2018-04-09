@@ -234,7 +234,15 @@ export class RESTore {
      * @param path Path to be canonized
      */
     private canonize(path: Path) {
-        return typeof path === 'string' ? path : '/' + path.map(encodeURIComponent).join('/');
+        let canonizedPath = typeof path === 'string' ? path : '/' + path.map(encodeURIComponent).join('/');
+        canonizedPath = canonizedPath.replace(/\/+/g, '/');
+        if (!canonizedPath.startsWith('/')) {
+            canonizedPath = '/' + canonizedPath;
+        }
+        if (canonizedPath.endsWith('/')) {
+            canonizedPath = canonizedPath.slice(0, canonizedPath.length - 1);
+        }
+        return canonizedPath;
     }
 
     private async _fetch<T = any>(path: Path, options: Options = { method: 'GET' }, index: number = 0): Promise<T | undefined> {
