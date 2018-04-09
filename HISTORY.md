@@ -1,3 +1,8 @@
+0.3.0 / 2018-04-09
+==================
+
+  * Add path canonization
+  * Add support for array paths
 
 0.2.0 / 2018-04-08
 ==================
