@@ -12,7 +12,7 @@ enum StoreEntryState {
     Stale,
 }
 
-type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+export type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
 /**
  * Request options
@@ -61,12 +61,12 @@ interface StoreEntry {
 export type Path = string | (string | number)[];
 
 export interface HandlerContext {
-    params: { [key: string]: string | undefined };
-    options: Options;
-    method: Method;
-    body?: any;
-    path: string;
-    store: RESTore;
+    readonly params: { [key: string]: string | undefined };
+    readonly options: Options;
+    readonly method: Method;
+    readonly body?: any;
+    readonly path: string;
+    readonly store: RESTore;
 }
 
 /**
@@ -254,23 +254,20 @@ export class RESTore {
             return undefined;
         }
         const next = async () => await this._fetch(path, options, index + 1, context);
-        if (typeof context === 'undefined') {
-            const store = this;
-            const canonizedPath = this.canonize(path);
-            const body = options.body;
-            const method = options.method;
-            context = {
-                params: {},
-                options,
-                method,
-                body,
-                path: canonizedPath,
-                store,
-            };
-        }
-        const match = rule.pattern.match(context.path);
+        const store = this;
+        const canonizedPath = this.canonize(path);
+        const body = options.body;
+        const method = options.method;
+        const match = rule.pattern.match(canonizedPath);
         if (match) {
-            context.params = match;
+            context = Object.assign({
+                get params() { return match; },
+                get options() { return options; },
+                get method() { return method; },
+                get body() { return body; },
+                get path() { return canonizedPath; },
+                get store() { return store; },
+            }, context);
             const promiseOrAsyncIterator = rule.handler.call(this, context, next);
             if (promiseOrAsyncIterator.then) {
                 const resource = await promiseOrAsyncIterator;
