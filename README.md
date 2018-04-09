@@ -55,9 +55,8 @@ const store = new RESTore();
 store.use('/users/:id', async function(params, options, path, next) {
     switch (options.method) {
         case 'PATCH':
-            const stored = this.stored(path);
             return {
-                ...stored,
+                ...this.stored(path),
                 ...options.body,
             };
         default:
@@ -88,8 +87,10 @@ await store.post('/users', {
 
 await store.patch('/users/coreh', { singing: true });
 
-const user = await store.get('/users/coreh');
-console.log(user); // { username: 'coreh', likes: ['Chocolate', 'Coffee'], singing: true }
+console.log(await store.get('/users/coreh'));
+// { username: 'coreh',
+//   likes: ['Chocolate', 'Coffee'],
+//   singing: true }
 ```
 
 ### Mounting existing REST API endpoints
