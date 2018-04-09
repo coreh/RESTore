@@ -5,6 +5,8 @@
 <strong>RESTful Data Store</strong><br><br>
 <img src="https://img.shields.io/npm/v/@coreh/restore.svg">
 <img src="https://img.shields.io/npm/l/@coreh/restore.svg">
+<img src="https://img.shields.io/travis/coreh/RESTore.svg">
+<img src="https://img.shields.io/david/coreh/RESTore.svg">
 </p>
 
 ## Introduction
