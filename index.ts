@@ -248,36 +248,42 @@ export class RESTore {
         return canonizedPath;
     }
 
-    private async _fetch<T = any>(path: Path, options: Options = { method: 'GET' }, index: number = 0): Promise<T | undefined> {
-        const next = async () => await this._fetch(path, options, index + 1);
+    private async _fetch<T = any>(path: Path, options: Options = { method: 'GET' }, index: number = 0, context?: HandlerContext): Promise<T | undefined> {
         const rule = this.rules[index];
         if (!rule) {
             return undefined;
         }
-        const canonizedPath = this.canonize(path);
-        const match = rule.pattern.match(canonizedPath);
-        if (match) {
-            const context = {
-                params: match,
+        const next = async () => await this._fetch(path, options, index + 1, context);
+        if (typeof context === 'undefined') {
+            const store = this;
+            const canonizedPath = this.canonize(path);
+            const body = options.body;
+            const method = options.method;
+            context = {
+                params: {},
                 options,
-                method: options.method,
-                body: options.body,
+                method,
+                body,
                 path: canonizedPath,
-                store: this,
+                store,
             };
+        }
+        const match = rule.pattern.match(context.path);
+        if (match) {
+            context.params = match;
             const promiseOrAsyncIterator = rule.handler.call(this, context, next);
             if (promiseOrAsyncIterator.then) {
                 const resource = await promiseOrAsyncIterator;
-                this.set(canonizedPath, resource);
+                this.set(context.path, resource);
                 this.notify();
             } else {
                 await new Promise((resolve, reject) => {
-                    this.consume(promiseOrAsyncIterator, canonizedPath, resolve)
+                    this.consume(promiseOrAsyncIterator, context!.path, resolve)
                         .then(() => resolve())
                         .catch(reject);
                 });
             }
-            const stored = this.store.get(canonizedPath);
+            const stored = this.store.get(context.path);
             if (stored !== undefined) {
                 if (stored.resource !== undefined) {
                     return stored.resource;
