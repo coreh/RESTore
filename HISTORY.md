@@ -1,3 +1,9 @@
+
+0.4.0 / 2018-04-09
+==================
+
+  * Move to a context parameter for the handler functions
+
 0.3.0 / 2018-04-09
 ==================
 
