@@ -179,7 +179,6 @@ export class RESTore {
             const entry = {
                 state: StoreEntryState.Loading,
                 promise: this._fetch(path),
-                path,
             }
 
             this.store.set(path, entry);
@@ -213,6 +212,15 @@ export class RESTore {
                 }
                 return stored.promise;
             }
+
+            const promise = this._fetch(path, options);
+
+            this.store.set(path, {
+                state: StoreEntryState.Loading,
+                promise,
+            });
+
+            return promise;
         }
         return this._fetch(path, options);
     }
