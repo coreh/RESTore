@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 import UrlPattern from 'url-pattern';
 
-(Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol.for("Symbol.asyncIterator");
+(Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol.for('Symbol.asyncIterator');
 
 export const Path = Symbol.for('RESTore.Path');
 export const Content = Symbol.for('RESTore.Content');
@@ -52,7 +52,7 @@ export interface Resource {
 
 interface StoreEntry {
     state: StoreEntryState;
-    promise?: Promise<any>
+    promise?: Promise<any>;
     resource?: any;
 }
 
@@ -60,27 +60,19 @@ export type Path = string | (string | number)[];
 
 /**
  * A Function to handle store requests
+ * @param params: Route params
+ * @param options: Request options
+ * @param path: Request path
+ * @param next: Call next handler in the chain
  */
 
-export interface HandlerFunction {
-
-    /**
-     * @param params: Route params
-     * @param options: Request options
-     * @param path: Request path
-     * @param next: Call next handler in the chain
-     */
-
-    (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>): AsyncIterable<Resource> | Promise<Resource>
-}
+export type HandlerFunction = (this: RESTore, params: any, options: Options, path: string, next: () => Promise<void>) => AsyncIterable<Resource> | Promise<Resource>;
 
 /**
  * A function that listens for changes in the store
  */
 
-export interface ListenerFunction {
-    (this: RESTore): void;
-}
+export type ListenerFunction = (this: RESTore) => void;
 
 interface Rule {
     pattern: UrlPattern;
@@ -111,41 +103,41 @@ export function endpoint(baseURL: string) {
 
         switch (options.method) {
             case 'GET':
-                if (response.status == 200) {
+                if (response.status === 200) {
                     return yield {
                         path,
                         body,
-                    }
+                    };
                 } else {
                     throw statusError(response.status, options.method, fullPath);
                 }
             case 'PUT':
             case 'PATCH':
-                if (response.status == 200 || response.status == 201) {
+                if (response.status === 200 || response.status === 201) {
                     return yield {
                         path,
                         body,
-                    }
+                    };
                 } else {
                     throw statusError(response.status, options.method, fullPath);
                 }
             case 'DELETE':
-                if (response.status == 200 || response.status == 201) {
+                if (response.status === 200 || response.status === 201) {
                     return yield {
                         path,
                         body: undefined,
-                    }
+                    };
                 } else {
                     throw statusError(response.status, options.method, fullPath);
                 }
             case 'POST':
-                if (response.status == 200 || response.status == 201) {
+                if (response.status === 200 || response.status === 201) {
                     // Do nothing
                 } else {
                     throw statusError(response.status, options.method, fullPath);
                 }
         }
-    }
+    };
 }
 
 export class RESTore {
@@ -182,7 +174,7 @@ export class RESTore {
             const entry = {
                 state: StoreEntryState.Loading,
                 promise: this._fetch(canonizedPath),
-            }
+            };
 
             this.store.set(canonizedPath, entry);
 
@@ -207,7 +199,7 @@ export class RESTore {
      */
 
     async fetch<T = any>(path: Path, options: Options = { method: 'GET' }): Promise<T | undefined> {
-        if (options.method == 'GET') {
+        if (options.method === 'GET') {
             const canonizedPath = this.canonize(path);
             const stored = this.store.get(canonizedPath);
             if (stored !== undefined) {
@@ -347,7 +339,7 @@ export class RESTore {
             return this;
         }
 
-        throw new Error('You must provide a handler function')
+        throw new Error('You must provide a handler function');
     }
 
     subscribe(listener: ListenerFunction) {
