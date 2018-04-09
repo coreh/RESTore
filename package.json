@@ -11,6 +11,7 @@
         "url-pattern": "^1.0.3"
     },
     "devDependencies": {
+        "typescript": "^2.8.1",
         "@types/isomorphic-fetch": "0.0.34"
     },
     "scripts": {
