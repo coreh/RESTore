@@ -70,7 +70,7 @@ store.use('/users', async function(params, options, path, next) {
     switch (options.method) {
         case 'POST':
             return {
-                [RESTore.Path]: `/users/${options.body.username}`,
+                [RESTore.Path]: ['users', options.body.username], // Same as `/users/${options.body.username}`
                 ...options.body,
             };
         default:
@@ -102,7 +102,7 @@ console.log(await store.get('/users/coreh'));
 store.use(RESTore.endpoint('https://api.example.com/'));
 
 // Usage
-store.get(`/flights/${airport}`)
+store.get(['flights', airport])
 ```
 
 ### Integrating with React "Suspense"
@@ -110,7 +110,7 @@ store.get(`/flights/${airport}`)
 ```jsx
 const Weather = (props) => {
     // .take() -> .get(), but will throw promise if not fetched
-    const weather = store.take(`/weather/${props.location}`);
+    const weather = store.take(['weather', props.location]);
     return (
         <div>
             <p>Temperature: {weather.temperature}</p>
