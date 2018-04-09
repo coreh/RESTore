@@ -4,6 +4,7 @@ import UrlPattern from 'url-pattern';
 (Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol.for("Symbol.asyncIterator");
 
 export const Path = Symbol.for('RESTore.Path');
+export const Content = Symbol.for('RESTore.Content');
 
 enum StoreEntryState {
     Loading,
@@ -41,6 +42,12 @@ export interface Resource {
      */
 
     [Path]?: string;
+
+    /**
+     * Resource content
+     */
+
+    [Content]?: string;
 }
 
 interface StoreEntry {
@@ -141,6 +148,7 @@ export function endpoint(baseURL: string) {
 
 export class RESTore {
     static Path = Path;
+    static Content = Content;
     static endpoint = endpoint;
 
     private rules: Rule[] = [];
@@ -196,10 +204,10 @@ export class RESTore {
         if (options.method == 'GET') {
             const stored = this.store.get(path);
             if (stored !== undefined) {
-                if (stored.promise) {
-                    return stored.promise;
+                if (stored.resource) {
+                    return stored.resource;
                 }
-                return stored.resource;
+                return stored.promise;
             }
         }
         return this._fetch(path, options);
@@ -216,25 +224,11 @@ export class RESTore {
             const promiseOrAsyncIterator = rule.handler.call(this, match, options, path, next);
             if (promiseOrAsyncIterator.then) {
                 const resource = await promiseOrAsyncIterator;
-                if (resource) {
-                    this.store.set(resource[Path] || path, {
-                        state: StoreEntryState.Fresh,
-                        resource: JSON.parse(JSON.stringify(resource)),
-                    })
-                } else {
-                    this.store.delete(path);
-                }
+                this.set(path, resource);
                 this.notify();
             } else {
                 for await (const resource of promiseOrAsyncIterator) {
-                    if (resource) {
-                        this.store.set(resource[Path] || path, {
-                            state: StoreEntryState.Fresh,
-                            resource: JSON.parse(JSON.stringify(resource)),
-                        })
-                    } else {
-                        this.store.delete(path);
-                    }
+                    this.set(path, resource);
                     this.notify();
                 }
             }
@@ -245,6 +239,26 @@ export class RESTore {
             return;
         }
         return next();
+    }
+
+    private set(defaultPath: string, resource: any) {
+        let content;
+        let path;
+        if (typeof resource === 'object') {
+            path = resource[Path] || defaultPath;
+            content = {}.hasOwnProperty.call(resource, Content) ? resource[Content] : resource;
+        } else {
+            path = defaultPath;
+            content = resource;
+        }
+        if (content !== undefined) {
+            this.store.set(path, {
+                state: StoreEntryState.Fresh,
+                resource: JSON.parse(JSON.stringify(content)),
+            });
+        } else {
+            this.store.delete(path);
+        }
     }
 
     private notify() {
