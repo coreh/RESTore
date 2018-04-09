@@ -45,7 +45,7 @@ RESTore is inspired by the following APIs/concepts:
 | Selector       | Path                                                     |
 | `.subscribe()` | `.subscribe()`                                           |
 
-## Sample Application
+## Examples
 
 ### Store Definition
 
