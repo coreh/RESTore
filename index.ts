@@ -1,7 +1,9 @@
 import fetch from 'isomorphic-fetch';
 import UrlPattern from 'url-pattern';
 
-(Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol.for('Symbol.asyncIterator');
+if (!(Symbol as any).asyncIterator) {
+    ((Symbol as any).asyncIterator) = Symbol.for('Symbol.asyncIterator');
+}
 
 export const Path = Symbol.for('RESTore.Path');
 export const Content = Symbol.for('RESTore.Content');
