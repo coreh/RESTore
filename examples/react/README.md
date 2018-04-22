@@ -1,4 +1,4 @@
-# React + RESTore Demo
+# React “Suspense” + RESTore Demo
 
 [Try it live here!](https://react-qwmcmhvzdc.now.sh)
 
