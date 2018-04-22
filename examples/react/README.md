@@ -7,3 +7,5 @@ It leverages the new “suspending” support in React to simplify the handling 
 - The new Context API (Available on React 16.3+)
 - `React.unstable_AsyncMode`
 - `React.Timeout`
+
+A high latency network is simulated using a simple random timeout function.
