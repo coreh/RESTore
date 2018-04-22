@@ -1,6 +1,6 @@
 # React “Suspense” + RESTore Demo
 
-[Try it live here!](https://react-qwmcmhvzdc.now.sh)
+[Try it live here!](https://restore-react-example.now.sh)
 
 This example code showcases how to use RESTore with React 16.4+
 
