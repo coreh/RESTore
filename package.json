@@ -12,12 +12,31 @@
         "url-pattern": "^1.0.3"
     },
     "devDependencies": {
-        "typescript": "^2.8.1",
-        "@types/isomorphic-fetch": "0.0.34"
+        "@types/isomorphic-fetch": "0.0.34",
+        "@types/jest": "^22.2.3",
+        "jest": "^22.4.3",
+        "ts-jest": "^22.4.4",
+        "typescript": "^2.8.1"
     },
     "scripts": {
         "prepare": "tsc --project . --declaration",
         "clean": "rm -f *.js *.d.ts",
-        "lint": "tslint -c tslint.json '**/*.ts' --exclude '**/node_modules/**'"
+        "lint": "tslint -c tslint.json '**/*.ts' --exclude '**/node_modules/**'",
+        "test": "jest",
+        "coverage": "jest --coverage"
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js",
+            "jsx",
+            "json",
+            "node"
+        ]
     }
 }
