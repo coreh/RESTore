@@ -2,9 +2,12 @@ import RESTore from '@coreh/restore';
 import uuid from 'uuid/v4';
 
 import latency from './latency';
+import logging from './logging';
 import { SAMPLE_MESSAGE_PATHS, SAMPLE_MESSAGES } from './sample-messages';
 
 const store = new RESTore();
+
+store.use('*', logging())
 
 store.use('/messages', async function* ({ method, body, path }, next) {
     switch (method) {
