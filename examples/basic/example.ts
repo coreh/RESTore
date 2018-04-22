@@ -1,4 +1,4 @@
-import RESTore from '.';
+import RESTore from '../../';
 
 const store = new RESTore();
 
