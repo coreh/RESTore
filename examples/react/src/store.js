@@ -6,46 +6,69 @@ import { SAMPLE_MESSAGE_PATHS, SAMPLE_MESSAGES } from './sample-messages';
 
 const store = new RESTore();
 
-store.use('/messages', async function* (context, next) {
-    switch (context.method) {
+store.use('/messages', async function* ({ method, body, path }, next) {
+    switch (method) {
         case 'GET':
             await latency();
             return yield SAMPLE_MESSAGE_PATHS;
+
         case 'POST': {
-            const path = `/messages/${uuid()}`;
+            const existingMessagePaths = await this.get(path);
+            const messagePath = `/messages/${uuid()}`;
+
+            // Yield the message object at the generated path
+            // Marking it as 'sending'
             yield {
-                [RESTore.Path]: path,
-                ...context.body,
+                [RESTore.Path]: messagePath,
+                ...body,
                 state: 'sending',
             };
+
+            // Yield a new message list with the newly generated
+            // message path included
             yield [
-                ...await this.get(context.path),
-                path,
+                ...existingMessagePaths,
+                messagePath,
             ];
+
+            // Simulate network latency
             await latency();
+
+            // Yield the message object at the generated path again,
+            // This time marked as 'sent'
             return yield {
-                [RESTore.Path]: path,
-                ...context.body,
+                [RESTore.Path]: messagePath,
+                ...body,
                 state: 'sent',
             };
         }
+
         default:
             return yield next();
     }
 });
 
-store.use('/messages/:id', async function (context, next) {
-    switch (context.method) {
-        case 'GET':
+store.use('/messages/:id', async function ({ method, path }, next) {
+    switch (method) {
+        case 'GET': {
+            // Lookup message in built-in sample messages
+            const sampleMessage = SAMPLE_MESSAGES[path];
+
+            // With latency to simulate a network request
             await latency();
-            const sampleMessage = SAMPLE_MESSAGES[context.path];
+
+            // If it exists, return it
             if (sampleMessage) {
                 return sampleMessage;
             }
+
+            // Otherwise delegate to the next handler in the chain
+            return next();
+        }
+
         default:
             return next();
     }
-    return next();
 });
 
 export default store;
