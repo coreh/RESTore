@@ -39,7 +39,7 @@ class BarRaw extends React.Component {
     render() {
         return (
             <div className="bar">
-                <input placeholder="Message" type="text" value={this.state.value} onKeyPress={this.handleKeyPress} onChange={this.handleChange} />
+                <input autoFocus placeholder="Message" type="text" value={this.state.value} onKeyPress={this.handleKeyPress} onChange={this.handleChange} />
                 <button onClick={this.handleSend}>Send</button>
             </div>
         );
