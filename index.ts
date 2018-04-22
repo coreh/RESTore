@@ -79,7 +79,7 @@ export interface HandlerContext {
  * @param next: Call next handler in the chain
  */
 
-export type HandlerFunction = (this: RESTore, context: HandlerContext, next: () => Promise<void>) => AsyncIterable<Resource> | Promise<Resource>;
+export type HandlerFunction = (this: RESTore, context: HandlerContext, next: () => Promise<void>) => AsyncIterable<Resource | {} | void> | Promise<Resource | {} | void>;
 
 /**
  * A function that listens for changes in the store
