@@ -1,13 +1,16 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    max-width: calc((600px + 100%) / 2);
+    margin: 0 auto;
 }
 
 ul.messages {
     list-style: none;
-    padding: 0;
+    padding: 4px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    margin: 0 0 44px;
 }
 
 ul.messages li {
@@ -39,6 +42,7 @@ ul.messages li.received {
     background: white;
     border-top: 1px solid #ddd;
     display: flex;
+    padding: 0 4px;
 }
 
 .bar input {
