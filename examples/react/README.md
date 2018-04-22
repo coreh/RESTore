@@ -12,7 +12,7 @@ It leverages the new “suspending” support in React to simplify the handling 
 - `React.unstable_AsyncMode`
 - `React.Timeout`
 
-A high latency network is simulated using a simple random timeout function.
+A high latency network is simulated using a random timeout function.
 
 You can check the Web Inspector for a log of all RESTore requests and responses.
 
@@ -41,3 +41,5 @@ The RESTful semantics and fully asynchronous nature of RESTore make it easy to m
 ```js
 store.use(RESTore.endpoint('https://api.example.com/'))
 ```
+
+(This functionality is not actually used by this example, it's fully local, and network requests are simply simulated)
