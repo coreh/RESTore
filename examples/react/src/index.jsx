@@ -20,6 +20,6 @@ function render() {
     );
 }
 
-render();
-
 store.subscribe(render);
+
+render();
