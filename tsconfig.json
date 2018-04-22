@@ -11,6 +11,7 @@
         "strictNullChecks": true
     },
     "exclude": [
-        "example.ts"
+        "examples/*",
+        "tests/*",
     ]
 }
