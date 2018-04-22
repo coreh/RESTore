@@ -16,7 +16,17 @@ class BarRaw extends React.Component {
         });
     }
 
+    handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            return this.handleSend();
+        }
+    }
+
     handleSend = () => {
+        if (this.state.value === '') {
+            return;
+        }
+
         this.props.store.post('/messages', {
             message: this.state.value
         });
@@ -29,7 +39,7 @@ class BarRaw extends React.Component {
     render() {
         return (
             <div className="bar">
-                <input placeholder="Message" type="text" value={this.state.value} onChange={this.handleChange} />
+                <input placeholder="Message" type="text" value={this.state.value} onKeyPress={this.handleKeyPress} onChange={this.handleChange} />
                 <button onClick={this.handleSend}>Send</button>
             </div>
         );
