@@ -9,3 +9,5 @@ It leverages the new “suspending” support in React to simplify the handling 
 - `React.Timeout`
 
 A high latency network is simulated using a simple random timeout function.
+
+You can check the Web Inspector for a log of all RESTore requests and responses.
