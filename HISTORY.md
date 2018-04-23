@@ -1,4 +1,14 @@
 
+0.5.0 / 2018-04-22
+==================
+
+  * Move `endpoint()` request handler to a separate file
+  * Fix bug where we would produce a promise chain cycle
+  * Fix bug where we would attempt to compare non-canonized paths
+  * Make return type requirements for handler functions less strict
+  * Use string enums internally to make debugging easier
+  * Add unit tests
+
 0.4.1 / 2018-04-22
 ==================
 
