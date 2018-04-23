@@ -1,3 +1,7 @@
+/**
+ * Module imports
+ */
+
 import UrlPattern from 'url-pattern';
 
 /*
@@ -264,25 +268,6 @@ export class RESTore {
     }
 
     /**
-     * Canonizes a path to string form
-     *
-     * @param path Path to be canonized
-     * @returns The canonized path
-     */
-
-    private canonize(path: Path) {
-        let canonizedPath = typeof path === 'string' ? path : '/' + path.map(encodeURIComponent).join('/');
-        canonizedPath = canonizedPath.replace(/\/+/g, '/');
-        if (!canonizedPath.startsWith('/')) {
-            canonizedPath = '/' + canonizedPath;
-        }
-        if (canonizedPath.endsWith('/')) {
-            canonizedPath = canonizedPath.slice(0, canonizedPath.length - 1);
-        }
-        return canonizedPath;
-    }
-
-    /**
      * Recursively calls request handlers in the chain that match the requested path
      *
      * @param path Path being requested
@@ -334,6 +319,25 @@ export class RESTore {
             return;
         }
         return next();
+    }
+
+    /**
+     * Canonizes a path to string form
+     *
+     * @param path Path to be canonized
+     * @returns The canonized path
+     */
+
+    private canonize(path: Path) {
+        let canonizedPath = typeof path === 'string' ? path : '/' + path.map(encodeURIComponent).join('/');
+        canonizedPath = canonizedPath.replace(/\/+/g, '/');
+        if (!canonizedPath.startsWith('/')) {
+            canonizedPath = '/' + canonizedPath;
+        }
+        if (canonizedPath.endsWith('/')) {
+            canonizedPath = canonizedPath.slice(0, canonizedPath.length - 1);
+        }
+        return canonizedPath;
     }
 
     /**
