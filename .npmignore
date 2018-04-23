@@ -6,3 +6,4 @@ logo.png
 examples
 tests
 coverage
+.travis.yml
