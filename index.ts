@@ -155,11 +155,22 @@ interface Rule {
  */
 
 export class RESTore {
+
+    /** Used to specify an alternative path for a resouce */
     static Path = Path;
+
+    /** Used to specify an alternative content for a resource
+     * (Useful when returning non-object payloads with a custom path)
+     */
     static Content = Content;
 
+    /** Rules that compose te request handler chain */
     private rules: Rule[] = [];
+
+    /** Listener functions for subscriptions */
     private listeners: ListenerFunction[] = [];
+
+    /** Map structure used as a data store */
     private store: Map<string, StoreEntry> = new Map();
 
     constructor() {
