@@ -155,7 +155,6 @@ interface Rule {
  */
 
 export class RESTore {
-
     /** Used to specify an alternative path for a resouce */
     static Path = Path;
 
