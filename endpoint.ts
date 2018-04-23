@@ -2,7 +2,7 @@ import fetch from 'isomorphic-fetch';
 
 import { HandlerFunction } from '.';
 
-function endpoint(baseURL: string): HandlerFunction {
+export function endpoint(baseURL: string): HandlerFunction {
     if (baseURL.endsWith('/')) {
         baseURL.slice(0, baseURL.length - 1);
     }
