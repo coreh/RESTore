@@ -111,7 +111,7 @@ it('should retrieve GET requests to the same path from the cache', async () => {
     expect(count).toEqual(2);
 });
 
-it('should NOT retrieve POST | PUT | DELETE requests to the same path from the cache', async () => {
+it('should NOT retrieve POST | PUT | DELETE | PATCH requests to the same path from the cache', async () => {
     const store = new RESTore();
     let count = 0;
     store.use(async function (context, next) {
@@ -124,7 +124,9 @@ it('should NOT retrieve POST | PUT | DELETE requests to the same path from the c
     await store.post('/some-path', {});
     await store.delete('/some-path');
     await store.delete('/some-path');
-    expect(count).toEqual(6);
+    await store.patch('/some-path', {});
+    await store.patch('/some-path', {});
+    expect(count).toEqual(8);
 });
 
 it('should include the correct method in the context object', async () => {
@@ -145,6 +147,10 @@ it('should include the correct method in the context object', async () => {
         expect(context.method).toEqual('DELETE');
         return {};
     });
+    store.use('/e', async function (context, next) {
+        expect(context.method).toEqual('PATCH');
+        return {};
+    });
     await store.get('/a');
     await store.fetch('/a');
     await store.fetch('/a', { method: 'GET' });
@@ -154,6 +160,8 @@ it('should include the correct method in the context object', async () => {
     await store.fetch('/c', { method: 'PUT', body: {} });
     await store.delete('/d');
     await store.fetch('/d', { method: 'DELETE', body: {} });
+    await store.patch('/e', {});
+    await store.fetch('/e', { method: 'PATCH', body: {} });
 });
 
 it('should include the correct path in the context object', async () => {
@@ -193,4 +201,6 @@ it('should throw on the default handler when calling unsupported methods other t
     await expect(store.fetch('/some-path', { method: 'PUT' })).rejects.toThrow();
     await expect(store.delete('/some-path')).rejects.toThrow();
     await expect(store.fetch('/some-path', { method: 'DELETE' })).rejects.toThrow();
+    await expect(store.patch('/some-path', {})).rejects.toThrow();
+    await expect(store.fetch('/some-path', { method: 'PATCH' })).rejects.toThrow();
 });
