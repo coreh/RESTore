@@ -269,10 +269,23 @@ it('should return the first resource yielded by an async generator request handl
     expect(await store.get('/some-path')).toEqual({ message: 'First' });
 });
 
-it('should return undefined if the async generator doesn\'t yield', async () => {
+it('should return undefined if the async generator request handler doesn\'t yield', async () => {
     const store = new RESTore();
     store.use(async function* (context, next) {
         return;
     });
     expect(await store.get('/some-path')).toBeUndefined();
+});
+
+it('should eventually have the last value yielded by the async generator request handler in the store', async () => {
+    const store = new RESTore();
+    store.use(async function* (context, next) {
+        yield { message: 'First' };
+        yield { message: 'Second' };
+        yield { message: 'Third' };
+    });
+    await store.get('/some-path');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    store.stored('/some-path');
+    expect(await store.get('/some-path')).toEqual({ message: 'Third' });
 });
