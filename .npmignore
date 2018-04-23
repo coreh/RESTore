@@ -1,6 +1,7 @@
 *.ts
 !*.d.ts
 tsconfig.json
+tslint.json
 logo.png
 examples
 tests
