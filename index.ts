@@ -1,18 +1,49 @@
 import fetch from 'isomorphic-fetch';
 import UrlPattern from 'url-pattern';
 
+/*
+ * Async iterator polyfill
+ */
+
 if (!(Symbol as any).asyncIterator) {
     ((Symbol as any).asyncIterator) = Symbol.for('Symbol.asyncIterator');
 }
 
+/**
+ * Used to specify an alternative path for a resouce
+ */
+
 export const Path = Symbol.for('RESTore.Path');
+
+/**
+ * Used to specify an alternative content for a resource
+ * (Useful when returning non-object payloads with a custom path)
+ */
+
 export const Content = Symbol.for('RESTore.Content');
 
+/**
+ * State of a resource in the store
+ */
+
 enum StoreEntryState {
+    /** Still being processed by the request handlers */
     Loading,
+
+    /** Has been processed by the request handlers, and the cache status is fresh */
     Fresh,
+
+    /** Has been processed by the request handlers, and the cache status is stale */
     Stale,
 }
+
+/**
+ * A request method
+ *
+ * Semantics are roughly equivalent to HTTP's
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+ */
 
 export type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
@@ -193,9 +224,8 @@ export class RESTore {
     /**
      * Synchronously retrieves the resource stored at the given path
      *
-     * Returns undefined if the resource is not stored
-     *
      * @param path Resource path
+     * @returns the stored resource or undefined if it's not stored
      */
 
     stored<T = any>(path: Path): T | undefined {
@@ -211,6 +241,8 @@ export class RESTore {
      * Throws a promise that will resolve to the requested resource if the resource is not stored
      *
      * @param path Resource path
+     * @returns The stored resource
+     * @throws A promise that will resolve to the requested resource
      */
 
     take<T = any>(path: Path): T {
@@ -240,8 +272,10 @@ export class RESTore {
 
     /**
      * Fetch a resource from the store
+     *
      * @param path Resource path
      * @param options Options
+     * @returns A promise that will resolve to the resource
      */
 
     async fetch<T = any>(path: Path, options: Options = { method: 'GET' }): Promise<T | undefined> {
@@ -269,7 +303,9 @@ export class RESTore {
 
     /**
      * Canonizes a path to string form
+     *
      * @param path Path to be canonized
+     * @returns The canonized path
      */
 
     private canonize(path: Path) {
@@ -286,6 +322,7 @@ export class RESTore {
 
     /**
      * Recursively calls request handlers in the chain that match the requested path
+     *
      * @param path Path being requested
      * @param options Request options
      * @param index Current position on the request handler chain
@@ -399,6 +436,7 @@ export class RESTore {
      * Install a global handler function
      *
      * @param handler Handler function to be installed globally
+     * @returns The store object (for chaining)
      */
 
     use(handler: HandlerFunction): this;
@@ -409,6 +447,7 @@ export class RESTore {
      *
      * @param route String defining a route
      * @param handler Handler function to be installed for the route
+     * @returns The store object (for chaining)
      */
 
     use(route: string, handler: HandlerFunction): this;
@@ -453,7 +492,9 @@ export class RESTore {
 
     /**
      * GET a resource from the store
+     *
      * @param path A path to GET
+     * @returns A promise to the resource
      */
 
     async get<T = any>(path: Path): Promise<T | undefined> {
@@ -462,8 +503,10 @@ export class RESTore {
 
     /**
      * POST to the specified path
+     *
      * @param path A path to POST
      * @param body Body for the POST request
+     * @returns A promise to the response
      */
 
     async post<T = any>(path: Path, body: T): Promise<T | undefined> {
@@ -475,8 +518,10 @@ export class RESTore {
 
     /**
      * PUT the resource at the specified path
+     *
      * @param path A path to PUT
      * @param body Body for the PUT request
+     * @returns A promise to the response
      */
 
     async put<T = any>(path: Path, body: T): Promise<T | undefined> {
@@ -488,8 +533,10 @@ export class RESTore {
 
     /**
      * PATCH the resource at the specified path
+     *
      * @param path A path to PATCH
      * @param body Body for the PATCH request
+     * @returns A promise to the response
      */
 
     async patch<T = any>(path: Path, body: T): Promise<T | undefined> {
@@ -501,7 +548,9 @@ export class RESTore {
 
     /**
      * DELETE the resource at the specified path
+     *
      * @param path A path to DELETE
+     * @returns A promise to the response
      */
 
     async delete<T = any>(path: Path): Promise<T | undefined> {
