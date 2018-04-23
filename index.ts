@@ -229,10 +229,7 @@ export class RESTore {
             throw entry.promise;
         }
 
-        if (stored.state === StoreEntryState.Stale) {
-            this._fetch(canonizedPath);
-        }
-
+        // TODO: Handle StoreEntryState.Stale
         if (stored.resource !== undefined) {
             return stored.resource;
         }
@@ -253,6 +250,7 @@ export class RESTore {
             const canonizedPath = this.canonize(path);
             const stored = this.store.get(canonizedPath);
             if (stored !== undefined) {
+                // TODO: Handle StoreEntryState.Stale
                 if (stored.resource !== undefined) {
                     return stored.resource;
                 }
