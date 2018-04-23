@@ -176,6 +176,10 @@ export class RESTore {
     /** Map structure used as a data store */
     private store: Map<string, StoreEntry> = new Map();
 
+    /**
+     * Store constructor
+     */
+
     constructor() {
         this.use(async function ({ params, options, path }) {
             switch (options.method) {
@@ -274,6 +278,7 @@ export class RESTore {
      * @param options Request options
      * @param index Current position on the request handler chain
      * @param context The context object that was passed to the previous handler
+     * @returns A promise that will resolve to the resource
      */
 
     private async _fetch<T = any>(path: Path, options: Options = { method: 'GET' }, index: number = 0, context?: HandlerContext): Promise<T | undefined> {
