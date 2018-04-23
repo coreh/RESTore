@@ -289,3 +289,74 @@ it('should eventually have the last value yielded by the async generator request
     store.stored('/some-path');
     expect(await store.get('/some-path')).toEqual({ message: 'Third' });
 });
+
+it('should call a subscriber function every time the store is updated', async () => {
+    const store = new RESTore();
+    store.use('/function', async function (context, next) {
+        return { message: 'Hello' };
+    });
+    store.use('/generator', async function* (context, next) {
+        yield { message: 'First' };
+        yield { message: 'Second' };
+        yield { message: 'Third' };
+    });
+    let count = 0;
+    store.subscribe(function () {
+        count++;
+    });
+    await store.get('/function');
+    await store.get('/generator');
+    await store.get('/some-other-path'); // The default handler will also produce an update (to undefined)
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    expect(count).toBe(5);
+});
+
+it('should be possible to store a resource on a different path than the request path', async () => {
+    const store = new RESTore();
+    store.use('/a', async function (context, next) {
+        return {
+            [Path]: '/b',
+            message: 'Hello',
+        };
+    });
+    expect(await store.get('/a')).toBeUndefined();
+    expect(store.stored('/b')).toEqual({ message: 'Hello' });
+});
+
+it('should be possible to yield resources on multiple paths', async () => {
+    const store = new RESTore();
+    store.use('/a', async function* (context, next) {
+        yield {
+            [Path]: '/b',
+            message: 'B',
+        };
+        yield {
+            [Path]: '/c',
+            message: 'C',
+        };
+        yield {
+            [Path]: '/d',
+            message: 'D',
+        };
+        yield {
+            [Path]: '/a',
+            message: 'A',
+        };
+    });
+    expect(await store.get('/a')).toEqual({ message: 'A' });
+    expect(store.stored('/b')).toEqual({ message: 'B' });
+    expect(store.stored('/c')).toEqual({ message: 'C' });
+    expect(store.stored('/d')).toEqual({ message: 'D' });
+});
+
+it('should be possible to use arrays of path components', async () => {
+    const store = new RESTore();
+    store.use('/some/path/with/multiple/components', async function (context, next) {
+        return { message: 'Hello' };
+    });
+    store.use('/some/path/with/a/:number/param', async function (context, next) {
+        return { message: 'Bye' };
+    });
+    expect(await store.get(['some', 'path', 'with', 'multiple', 'components'])).toEqual({ message: 'Hello' });
+    expect(await store.get(['some', 'path', 'with', 'a', 5, 'param'])).toEqual({ message: 'Bye' });
+});
