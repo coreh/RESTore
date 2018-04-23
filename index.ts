@@ -40,17 +40,10 @@ export type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
  */
 
 export interface Options {
-
-    /**
-     * Request method
-     */
-
+    /** Request method */
     method: Method;
 
-    /**
-     * Request body
-     */
-
+    /** Request body */
     body?: any;
 }
 
