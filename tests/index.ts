@@ -30,6 +30,13 @@ it('should accept a handler function', async () => {
     expect((store as any).rules[0].pattern.match('/route')).toBeTruthy();
 });
 
+it('should throw when passing undefined as a handler function', async () => {
+    const store = new RESTore();
+    expect(() => {
+        store.use(undefined as any);
+    }).toThrow();
+});
+
 it('should accept a handler function without a route string', async () => {
     const store = new RESTore();
     let handlerFunction;
