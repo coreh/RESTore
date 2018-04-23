@@ -346,9 +346,10 @@ export class RESTore {
      */
 
     private async consume<T>(asyncIterator: AsyncIterable<Resource | undefined>, path: Path, resolve: () => void) {
+        const canonizedPath = this.canonize(path);
         for await (const resource of asyncIterator) {
             const pathSet = this.set(path, resource);
-            if (pathSet === path) {
+            if (this.canonize(pathSet) === canonizedPath) {
                 resolve();
             }
             this.notify();
