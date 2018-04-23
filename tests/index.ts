@@ -258,3 +258,21 @@ it('should return a value immediately when calling take() on a stored resource',
     await store.get('/some-path');
     expect(store.take('/some-path')).toEqual({ message: 'Hello' });
 });
+
+it('should return the first resource yielded by an async generator request handler', async () => {
+    const store = new RESTore();
+    store.use(async function* (context, next) {
+        yield { message: 'First' };
+        yield { message: 'Second' };
+        yield { message: 'Third' };
+    });
+    expect(await store.get('/some-path')).toEqual({ message: 'First' });
+});
+
+it('should return undefined if the async generator doesn\'t yield', async () => {
+    const store = new RESTore();
+    store.use(async function* (context, next) {
+        return;
+    });
+    expect(await store.get('/some-path')).toBeUndefined();
+});
