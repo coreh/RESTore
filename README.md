@@ -103,8 +103,10 @@ console.log(await store.get('/users/coreh'));
 ### Mounting existing REST API endpoints
 
 ```js
+import endpoint from '@coreh/restore/endpoint';
+
 // Declaration
-store.use(RESTore.endpoint('https://api.example.com/'));
+store.use(endpoint('https://api.example.com/'));
 
 // Usage
 store.get(['flights', airport])
