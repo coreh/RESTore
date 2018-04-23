@@ -178,19 +178,9 @@ it('should include the correct path in the context object', async () => {
         expect(context.path).toEqual('/c');
         return {};
     });
-    store.use('/d', async function (context, next) {
-        expect(context.path).toEqual('/d');
-        return {};
-    });
     await store.get('/a');
-    await store.fetch('/a');
-    await store.fetch('/a', { method: 'GET' });
-    await store.post('/b', {});
-    await store.fetch('/b', { method: 'POST', body: {} });
-    await store.put('/c', {});
-    await store.fetch('/c', { method: 'PUT', body: {} });
-    await store.delete('/d');
-    await store.fetch('/d', { method: 'DELETE', body: {} });
+    await store.get('/b');
+    await store.get('/c');
 });
 
 it('should throw on the default handler when calling unsupported methods other than GET', async () => {
