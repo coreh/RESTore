@@ -133,13 +133,13 @@ interface StoreEntry {
 
 enum StoreEntryState {
     /** Still being processed by the request handlers */
-    Loading,
+    Loading = 'loading',
 
     /** Has been processed by the request handlers, and the cache status is fresh */
-    Fresh,
+    Fresh = 'fresh',
 
     /** Has been processed by the request handlers, and the cache status is stale */
-    Stale,
+    Stale = 'stale',
 }
 
 /**
