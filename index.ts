@@ -314,10 +314,7 @@ export class RESTore {
             }
             const stored = this.store.get(context.path);
             if (stored !== undefined) {
-                if (stored.resource !== undefined) {
-                    return stored.resource;
-                }
-                return stored.promise;
+                return stored.resource;
             }
             return;
         }
