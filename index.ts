@@ -40,19 +40,19 @@ export interface Options {
  */
 
 export interface Resource {
-
-    /**
-     * Resource path
-     */
-
+    /** Resource path */
     [Path]?: Path;
 
-    /**
-     * Resource content
-     */
-
+    /** Resource content */
     [Content]?: string;
 }
+
+/**
+ * A entry in the store
+ *
+ * Holds a resource or a promise that will eventually resolve to
+ * the resource, along with a state.
+ */
 
 interface StoreEntry {
     state: StoreEntryState;
@@ -62,12 +62,27 @@ interface StoreEntry {
 
 export type Path = string | (string | number)[];
 
+/**
+ * The `context` parameter passed to the Handler function
+ */
+
 export interface HandlerContext {
+    /** Parameters extracted from the route match */
     readonly params: { [key: string]: string | undefined };
+
+    /** The options object passed to the `fetch` function */
     readonly options: Options;
+
+    /** The method of the current request */
     readonly method: Method;
+
+    /** The body of the current request */
     readonly body?: any;
+
+    /** The path of the current request */
     readonly path: string;
+
+    /** The store instance */
     readonly store: RESTore;
 }
 
@@ -87,6 +102,10 @@ export type HandlerFunction = (this: RESTore, context: HandlerContext, next: () 
 
 export type ListenerFunction = (this: RESTore) => void;
 
+/**
+ * A rule used to match paths to request handlers
+ */
+
 interface Rule {
     pattern: UrlPattern;
     handler: HandlerFunction;
@@ -102,9 +121,7 @@ export function endpoint(baseURL: string): HandlerFunction {
     }
 
     return async function* ({ params, options, method, path }) {
-
         const fullPath = baseURL + path;
-
         const response = await fetch(fullPath, options);
 
         let body;
@@ -173,12 +190,28 @@ export class RESTore {
         });
     }
 
+    /**
+     * Synchronously retrieves the resource stored at the given path
+     *
+     * Returns undefined if the resource is not stored
+     *
+     * @param path Resource path
+     */
+
     stored<T = any>(path: Path): T | undefined {
         const stored = this.store.get(this.canonize(path));
         if (stored) {
             return stored.resource;
         }
     }
+
+    /**
+     * Synchronously retrieves the resource stored at the given path
+     *
+     * Throws a promise that will resolve to the requested resource if the resource is not stored
+     *
+     * @param path Resource path
+     */
 
     take<T = any>(path: Path): T {
         const canonizedPath = this.canonize(path);
@@ -238,6 +271,7 @@ export class RESTore {
      * Canonizes a path to string form
      * @param path Path to be canonized
      */
+
     private canonize(path: Path) {
         let canonizedPath = typeof path === 'string' ? path : '/' + path.map(encodeURIComponent).join('/');
         canonizedPath = canonizedPath.replace(/\/+/g, '/');
@@ -249,6 +283,14 @@ export class RESTore {
         }
         return canonizedPath;
     }
+
+    /**
+     * Recursively calls request handlers in the chain that match the requested path
+     * @param path Path being requested
+     * @param options Request options
+     * @param index Current position on the request handler chain
+     * @param context The context object that was passed to the previous handler
+     */
 
     private async _fetch<T = any>(path: Path, options: Options = { method: 'GET' }, index: number = 0, context?: HandlerContext): Promise<T | undefined> {
         const rule = this.rules[index];
@@ -262,6 +304,7 @@ export class RESTore {
         const method = options.method;
         const match = rule.pattern.match(canonizedPath);
         if (match) {
+            // Ensures these properties are not overriden by handlers
             context = Object.assign({
                 get params() { return match; }, set params(value) { return; },
                 get options() { return options; }, set options(value) { return; },
@@ -294,6 +337,14 @@ export class RESTore {
         return next();
     }
 
+    /**
+     * Consume an async iterable, and resolve as soon as the originally requested path is yielded
+     *
+     * @param asyncIterator async iterable to be consumed
+     * @param path Original request path
+     * @param resolve Callback to resolve early as soon as the original path is yielded
+     */
+
     private async consume<T>(asyncIterator: AsyncIterable<Resource | undefined>, path: Path, resolve: () => void) {
         for await (const resource of asyncIterator) {
             const pathSet = this.set(path, resource);
@@ -303,6 +354,14 @@ export class RESTore {
             this.notify();
         }
     }
+
+    /**
+     * Store a resource at a path
+     *
+     * @param defaultPath Default path to store the resource at (Might be overriden by the Resource)
+     * @param resource Resource to be stored
+     * @returns The path that the restore was ultimately stored at
+     */
 
     private set(defaultPath: Path, resource: any) {
         let content;
@@ -325,6 +384,10 @@ export class RESTore {
         return path;
     }
 
+    /**
+     * Notify listeners about an update
+     */
+
     private notify() {
         for (const listener of this.listeners) {
             Promise.resolve().then(() => listener.call(this));
@@ -333,6 +396,8 @@ export class RESTore {
 
     /**
      * Install a global handler function
+     *
+     * @param handler Handler function to be installed globally
      */
 
     use(handler: HandlerFunction): this;
@@ -340,6 +405,9 @@ export class RESTore {
     /**
      * Install a handler function for a specific route
      * (e.g. '/users/:id')
+     *
+     * @param route String defining a route
+     * @param handler Handler function to be installed for the route
      */
 
     use(route: string, handler: HandlerFunction): this;
@@ -365,6 +433,14 @@ export class RESTore {
 
         throw new Error('You must provide a handler function');
     }
+
+    /**
+     * Subscribe to receive updates from the store
+     *
+     * The listener function will be called every time the store contents are updated
+     *
+     * @param listener listener function for the subscription
+     */
 
     subscribe(listener: ListenerFunction) {
         this.listeners.push(listener);
