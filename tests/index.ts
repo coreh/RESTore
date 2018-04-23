@@ -98,7 +98,7 @@ it('should resolve to the value provided by the return function', async () => {
     expect(response).toEqual({ message: 'hello' });
 });
 
-it('should retrieve GET requests to the same path from the cache', async () => {
+it('should retrieve GET requests to the same path from the store without calling the handler twice', async () => {
     const store = new RESTore();
     let count = 0;
     store.use(async function (context, next) {
@@ -111,7 +111,7 @@ it('should retrieve GET requests to the same path from the cache', async () => {
     expect(count).toEqual(2);
 });
 
-it('should NOT retrieve POST | PUT | DELETE | PATCH requests to the same path from the cache', async () => {
+it('should NOT retrieve POST | PUT | DELETE | PATCH requests to the same path from the store without calling the handler twice', async () => {
     const store = new RESTore();
     let count = 0;
     store.use(async function (context, next) {
@@ -127,6 +127,20 @@ it('should NOT retrieve POST | PUT | DELETE | PATCH requests to the same path fr
     await store.patch('/some-path', {});
     await store.patch('/some-path', {});
     expect(count).toEqual(8);
+});
+
+it('should return a promise for multiple concurrent GET requests without calling the handler twice', async () => {
+    const store = new RESTore();
+    let count = 0;
+    store.use(async function (context, next) {
+        count++;
+        await new Promise(() => { /* forever */ });
+    });
+    const promiseA = store.get('/some-path');
+    const promiseB = store.get('/some-path');
+    expect(promiseA).toBeInstanceOf(Promise);
+    expect(promiseB).toBeInstanceOf(Promise);
+    expect(count).toBe(1);
 });
 
 it('should include the correct method in the context object', async () => {
@@ -195,6 +209,29 @@ it('should throw on the default handler when calling unsupported methods other t
     await expect(store.fetch('/some-path', { method: 'PATCH' })).rejects.toThrow();
 });
 
+it('should return undefined when calling stored() on a never requested resource', async () => {
+    const store = new RESTore();
+    expect(store.stored('/some-path')).toBeUndefined();
+});
+
+it('should return undefined when calling stored() on a pending resource', async () => {
+    const store = new RESTore();
+    store.use(async function (context, next) {
+        await new Promise(() => { /* forever */ });
+    });
+    store.get('/some-path');
+    expect(store.stored('/some-path')).toBeUndefined();
+});
+
+it('should return a value immediately when calling stored() on a stored resource', async () => {
+    const store = new RESTore();
+    store.use(async function (context, next) {
+        return { message: 'Hello' };
+    });
+    await store.get('/some-path');
+    expect(store.stored('/some-path')).toEqual({ message: 'Hello' });
+});
+
 it('should throw a Promise when calling take() on a never requested resource', async () => {
     const store = new RESTore();
     expect(() => {
@@ -213,7 +250,7 @@ it('should throw a Promise when calling take() on a pending resource', async () 
     }).toThrow(Promise);
 });
 
-it('should return a value immediately when calling take() on a cached resource', async () => {
+it('should return a value immediately when calling take() on a stored resource', async () => {
     const store = new RESTore();
     store.use(async function (context, next) {
         return { message: 'Hello' };
