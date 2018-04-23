@@ -22,21 +22,6 @@ export const Path = Symbol.for('RESTore.Path');
 export const Content = Symbol.for('RESTore.Content');
 
 /**
- * State of a resource in the store
- */
-
-enum StoreEntryState {
-    /** Still being processed by the request handlers */
-    Loading,
-
-    /** Has been processed by the request handlers, and the cache status is fresh */
-    Fresh,
-
-    /** Has been processed by the request handlers, and the cache status is stale */
-    Stale,
-}
-
-/**
  * A request method
  *
  * Semantics are roughly equivalent to HTTP's
@@ -78,17 +63,8 @@ export interface Resource {
 }
 
 /**
- * A entry in the store
- *
- * Holds a resource or a promise that will eventually resolve to
- * the resource, along with a state.
+ * A path to a resource, which can either be a string or an array of path components
  */
-
-interface StoreEntry {
-    state: StoreEntryState;
-    promise?: Promise<any>;
-    resource?: any;
-}
 
 export type Path = string | (string | number)[];
 
@@ -133,13 +109,50 @@ export type HandlerFunction = (this: RESTore, context: HandlerContext, next: () 
 export type ListenerFunction = (this: RESTore) => void;
 
 /**
+ * A entry in the store
+ */
+
+interface StoreEntry {
+    /** State of the store entry */
+    state: StoreEntryState;
+
+    /** Promise that will eventually resolve to the resource */
+    promise?: Promise<any>;
+
+    /** Resource if already resolved */
+    resource?: any;
+}
+
+/**
+ * State of a store entry
+ */
+
+enum StoreEntryState {
+    /** Still being processed by the request handlers */
+    Loading,
+
+    /** Has been processed by the request handlers, and the cache status is fresh */
+    Fresh,
+
+    /** Has been processed by the request handlers, and the cache status is stale */
+    Stale,
+}
+
+/**
  * A rule used to match paths to request handlers
  */
 
 interface Rule {
+    /** Route matching pattern */
     pattern: UrlPattern;
+
+    /** Handler function */
     handler: HandlerFunction;
 }
+
+/**
+ * RESTful data store
+ */
 
 export class RESTore {
     static Path = Path;
