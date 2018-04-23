@@ -194,3 +194,30 @@ it('should throw on the default handler when calling unsupported methods other t
     await expect(store.patch('/some-path', {})).rejects.toThrow();
     await expect(store.fetch('/some-path', { method: 'PATCH' })).rejects.toThrow();
 });
+
+it('should throw a Promise when calling take() on a never requested resource', async () => {
+    const store = new RESTore();
+    expect(() => {
+        store.take('/some-path');
+    }).toThrow(Promise);
+});
+
+it('should throw a Promise when calling take() on a pending resource', async () => {
+    const store = new RESTore();
+    store.use(async function (context, next) {
+        await new Promise(() => { /* forever */ });
+    });
+    store.get('/some-path');
+    expect(() => {
+        store.take('/some-path');
+    }).toThrow(Promise);
+});
+
+it('should return a value immediately when calling take() on a cached resource', async () => {
+    const store = new RESTore();
+    store.use(async function (context, next) {
+        return { message: 'Hello' };
+    });
+    await store.get('/some-path');
+    expect(store.take('/some-path')).toEqual({ message: 'Hello' });
+});
